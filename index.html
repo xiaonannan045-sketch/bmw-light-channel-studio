@@ -110,7 +110,16 @@
         <button id="exportBackupButton" class="button primary full" disabled>生成新的 .cod 备份</button><p id="exportMessage" class="export-message"></p>
       </section>
     </main>
-    <footer><span>BMW Light Channel Studio · Community Preview</span><span>不隶属于 BMW 或 BimmerCode · 使用原厂协议数据时请自行验证</span></footer>
+    <footer>
+      <div class="footer-meta"><span>BMW Light Channel Studio · Community Preview</span><span>不隶属于 BMW 或 BimmerCode · 使用原厂协议数据时请自行验证</span></div>
+      <div class="footer-disclaimer">
+        <strong>【宝马G底盘迎宾灯光可视化工具】</strong>
+        <span>仅支持G底盘（G20/G28/G22等）</span>
+        <span>✅ 操作：拖动滑块预览灯光动画 → 导出配置JSON</span>
+        <span>⚠️ 重要：本工具只生成配置文件，不会远程刷写车辆！</span>
+        <span>⚠️ 刷写前务必备份原车BCM编码，改错后果自负</span>
+      </div>
+    </footer>
   </div>
   <script src="bplist.js"></script><script src="app.js"></script><script src="app-events.js"></script>
 </body>

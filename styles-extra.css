@@ -31,3 +31,5 @@
   .zone-grid{grid-template-columns:1fr}
   .block-title-row{align-items:flex-start}.mapping-card .block-title-row{flex-direction:column}
 }
+footer{flex-direction:column;gap:12px}.footer-meta{display:flex;justify-content:space-between;gap:12px;width:100%}.footer-disclaimer{display:flex;flex-direction:column;gap:5px;width:100%;padding:12px 14px;border:1px solid rgba(255,189,84,.2);border-radius:11px;background:rgba(255,189,84,.045);color:#b9a88b;line-height:1.55}.footer-disclaimer strong{color:#ffd18b;font-size:11px}.footer-disclaimer span:nth-last-child(-n+2){color:#d9b78a}
+@media(max-width:900px){.footer-meta{align-items:flex-start;flex-direction:column;gap:6px;line-height:1.45}}
