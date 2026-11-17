@@ -1,0 +1,10 @@
+{
+  "format": "bmw-light-channel-mapping",
+  "version": 1,
+  "block": "37F1",
+  "offset": 0,
+  "mode": "all",
+  "byteOrder": "normal",
+  "channelBytes": 16,
+  "note": "示例地址，不代表任何具体车型；请替换为你已经验证的块地址和偏移。"
+}

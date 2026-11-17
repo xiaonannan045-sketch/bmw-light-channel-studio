@@ -1,0 +1,117 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="BMW G/F 底盘原厂大灯 Channel 可视化编程与 BimmerCode iOS 备份编辑工具">
+  <title>BMW Light Channel Studio</title>
+  <link rel="stylesheet" href="styles.css">
+  <link rel="stylesheet" href="styles-extra.css">
+</head>
+<body>
+  <div class="app-shell">
+    <header class="topbar">
+      <div>
+        <p class="eyebrow">LOCAL · ORIGINAL PROTOCOL · OPEN TOOL</p>
+        <h1>BMW Light Channel Studio</h1>
+        <p class="subtitle">大灯 Channel 可视化编程 · 实时预览 · BimmerCode 备份写入</p>
+      </div>
+      <div class="top-actions">
+        <span class="privacy-pill"><span class="status-dot"></span>纯本地处理，不上传车辆数据</span>
+        <button id="loadDemoButton" class="button ghost">载入演示</button>
+        <button id="exportProjectButton" class="button ghost">导出工程</button>
+        <label class="button ghost file-button">导入工程<input id="projectFileInput" type="file" accept=".json,application/json"></label>
+      </div>
+    </header>
+
+    <main class="workspace">
+      <section class="panel editor-panel">
+        <div class="panel-heading">
+          <div><span class="step">01</span><h2>Channel 编辑</h2></div>
+          <button id="addChannelButton" class="icon-button" title="添加 Channel">＋</button>
+        </div>
+        <div class="channel-toolbar">
+          <label>预设<select id="presetSelect"><option value="welcome">迎宾展开</option><option value="breath">呼吸</option><option value="sweep">流水扫描</option><option value="pulse">双脉冲</option><option value="linear">线性渐亮</option><option value="clear">全部熄灭</option></select></label>
+          <button id="applyPresetButton" class="button small">应用</button>
+          <button id="mirrorButton" class="button small ghost">镜像</button>
+        </div>
+        <div id="channelList" class="channel-list" aria-label="Channel 列表"></div>
+
+        <div class="editor-block">
+          <div class="block-title-row">
+            <div><h3 id="selectedChannelTitle">Channel 01</h3><p id="selectedChannelMeta">16 bytes · 0–255</p></div>
+            <label class="inline-field">名称<input id="channelNameInput" type="text" maxlength="28"></label>
+          </div>
+          <canvas id="curveCanvas" width="720" height="310" aria-label="曲线编辑器"></canvas>
+          <div class="curve-tools">
+            <span>拖动节点调整亮度</span>
+            <label>平滑度<input id="smoothRange" type="range" min="0" max="100" value="55"></label>
+            <button id="normalizeButton" class="text-button">归一化</button>
+            <button id="invertButton" class="text-button">反相</button>
+          </div>
+        </div>
+
+        <div class="hex-block">
+          <div class="block-title-row">
+            <div><h3>十六进制</h3><p>高手可直接输入，空格与逗号均可</p></div>
+            <span id="hexValidation" class="validation ok">16 / 16 bytes</span>
+          </div>
+          <textarea id="hexInput" spellcheck="false" rows="4"></textarea>
+          <div class="hex-actions"><button id="applyHexButton" class="button small">应用 Hex</button><button id="copyHexButton" class="button small ghost">复制</button></div>
+        </div>
+
+        <div class="translation-block"><h3>字符意义翻译</h3><div id="byteTranslation" class="translation-grid"></div></div>
+      </section>
+
+      <section class="panel preview-panel">
+        <div class="panel-heading">
+          <div><span class="step">02</span><h2>灯光预览</h2></div>
+          <div class="segmented" role="group" aria-label="预览视角"><button class="active" data-view="front">正面</button><button data-view="road">路面</button></div>
+        </div>
+        <div id="previewStage" class="preview-stage front-view">
+          <div class="ambient-grid"></div>
+          <div class="vehicle-silhouette">
+            <div class="hood-line"></div><div class="kidney left"></div><div class="kidney right"></div>
+            <div class="lamp left-lamp"><div class="lamp-shell"></div><div class="light-zone zone-drl" data-zone="drl"></div><div class="light-zone zone-low" data-zone="low"></div><div class="light-zone zone-high" data-zone="high"></div><div class="light-zone zone-accent" data-zone="accent"></div></div>
+            <div class="lamp right-lamp"><div class="lamp-shell"></div><div class="light-zone zone-drl" data-zone="drl"></div><div class="light-zone zone-low" data-zone="low"></div><div class="light-zone zone-high" data-zone="high"></div><div class="light-zone zone-accent" data-zone="accent"></div></div>
+          </div>
+          <div class="road-projection"><div class="beam beam-left"></div><div class="beam beam-right"></div></div>
+          <div class="preview-readout"><span id="frameReadout">FRAME 01 / 16</span><span id="timeReadout">0.00 s</span></div>
+        </div>
+        <div class="transport">
+          <button id="playButton" class="play-button" aria-label="播放">▶</button><input id="timelineRange" type="range" min="0" max="15" value="0">
+          <label>速度<select id="speedSelect"><option value="120">0.5×</option><option value="70" selected>1×</option><option value="40">2×</option></select></label>
+          <label class="switch-label"><input id="loopCheckbox" type="checkbox" checked><span class="switch"></span>循环</label>
+        </div>
+        <div class="zone-mapping">
+          <div class="block-title-row"><div><h3>预览映射</h3><p>把 Channel 分配到灯组，仅影响视觉预览</p></div></div>
+          <div class="zone-grid"><label>日行灯<select data-zone-select="drl"></select></label><label>近光<select data-zone-select="low"></select></label><label>远光<select data-zone-select="high"></select></label><label>装饰灯<select data-zone-select="accent"></select></label></div>
+        </div>
+        <div class="data-summary">
+          <h3>输出数据</h3>
+          <div class="summary-stats"><div><span>Channels</span><strong id="channelCountStat">8</strong></div><div><span>每通道</span><strong id="bytesPerChannelStat">16 B</strong></div><div><span>总数据</span><strong id="totalBytesStat">128 B</strong></div><div><span>校验</span><strong id="checksumStat">00000000</strong></div></div>
+          <pre id="combinedHexOutput" class="combined-hex"></pre><button id="copyCombinedButton" class="button ghost full">复制全部 Channel 数据</button>
+        </div>
+      </section>
+
+      <section class="panel backup-panel">
+        <div class="panel-heading"><div><span class="step">03</span><h2>BimmerCode 备份</h2></div><span id="backupStatusBadge" class="badge neutral">未载入</span></div>
+        <label id="dropZone" class="drop-zone"><input id="backupFileInput" type="file" accept=".cod,application/octet-stream"><span class="drop-icon">⇧</span><strong>拖入 BimmerCode iOS .cod 备份</strong><span>或点击选择文件</span><small>原文件不会被覆盖，浏览器不会上传文件</small></label>
+        <div id="backupInfo" class="backup-info hidden"><div class="info-row"><span>文件</span><strong id="backupFilename">—</strong></div><div class="info-row"><span>VIN</span><strong id="backupVin">—</strong></div><div class="info-row"><span>ECU</span><strong id="backupEcu">—</strong></div><div class="info-row"><span>CAFD</span><strong id="backupCafd">—</strong></div><div class="info-row"><span>数据块</span><strong id="backupBlocks">—</strong></div></div>
+
+        <div class="mapping-card">
+          <div class="block-title-row"><div><h3>写入映射</h3><p>指定 Channel 数据在编码块中的位置</p></div><label class="button tiny ghost file-button">导入映射<input id="mappingFileInput" type="file" accept=".json,application/json"></label></div>
+          <div class="form-grid"><label>数据块地址<select id="blockSelect"><option value="">请先导入备份</option></select></label><label>起始偏移<input id="offsetInput" type="number" min="0" value="0"></label><label>写入 Channel<select id="writeModeSelect"><option value="all">全部 Channel 连续写入</option><option value="selected">仅当前 Channel</option></select></label><label>字节顺序<select id="byteOrderSelect"><option value="normal">正序</option><option value="reverse-channel">每通道倒序</option><option value="reverse-all">全部倒序</option></select></label></div>
+          <div id="rangeMeter" class="range-meter"><div id="rangeMeterFill" class="range-meter-fill"></div></div><p id="rangeDescription" class="range-description">载入备份后检查写入范围</p><button id="saveMappingButton" class="text-button">导出当前映射 JSON</button>
+        </div>
+
+        <div class="diff-card"><div class="block-title-row"><div><h3>变更预览</h3><p>只显示即将改变的字节</p></div><span id="diffCount" class="badge neutral">0 bytes</span></div><div id="diffList" class="diff-list"><p class="empty-state">导入备份并选择映射后显示差异</p></div></div>
+        <div class="warning-card"><strong>签名与风险提示</strong><p>工具只修改指定 coding data bytes，并保留原备份的 NCD 签名块。BimmerCode 是否会在恢复时重新签名，需用低风险参数先验证。仅对同一车辆、同一 ECU 软件版本的新鲜备份操作。</p><label class="confirm-row"><input id="riskCheckbox" type="checkbox">我已保留原始备份并理解风险</label></div>
+        <button id="exportBackupButton" class="button primary full" disabled>生成新的 .cod 备份</button><p id="exportMessage" class="export-message"></p>
+      </section>
+    </main>
+    <footer><span>BMW Light Channel Studio · Community Preview</span><span>不隶属于 BMW 或 BimmerCode · 使用原厂协议数据时请自行验证</span></footer>
+  </div>
+  <script src="bplist.js"></script><script src="app.js"></script><script src="app-events.js"></script>
+</body>
+</html>
