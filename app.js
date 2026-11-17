@@ -2,13 +2,19 @@
   "use strict";
   const FRAME_COUNT = 16;
   const COLORS = ["#56c8ff", "#5cf0cb", "#ffc45f", "#c38cff", "#ff7e90", "#72a0ff", "#e9f27a", "#70e6ff", "#ff9d5c", "#8df59a", "#e1a6ff", "#ff6ec7"];
+  const VIDEO_WELCOME_PROFILES = [
+    [0, 0, 0, 0, 77, 255, 255, 178, 0, 0, 26, 77, 128, 77, 26, 0],
+    [0, 0, 0, 0, 0, 255, 255, 128, 0, 0, 0, 0, 0, 0, 0, 0],
+    [0, 0, 0, 0, 0, 0, 0, 26, 77, 128, 130, 130, 102, 77, 26, 0],
+    [0, 9, 26, 77, 128, 128, 128, 102, 77, 77, 128, 128, 128, 128, 77, 0]
+  ];
   const $ = selector => document.querySelector(selector);
   const $$ = selector => [...document.querySelectorAll(selector)];
   const clamp = value => Math.max(0, Math.min(255, Math.round(value)));
   const hexByte = value => clamp(value).toString(16).toUpperCase().padStart(2, "0");
 
   const state = {
-    channels: [], selected: 0, frame: 0, playing: false, timer: null, backup: null,
+    channels: [], selected: 0, frame: 0, playing: false, timer: null, backup: null, previewTheme: "",
     previewMap: { drl: 0, low: 1, high: 2, accent: 3 },
     mapping: { block: "", offset: 0, mode: "all", byteOrder: "normal" }
   };
@@ -16,6 +22,7 @@
   function pattern(type, channelIndex) {
     return Array.from({ length: FRAME_COUNT }, (_, frame) => {
       const x = frame / (FRAME_COUNT - 1);
+      if (type === "video-welcome") return VIDEO_WELCOME_PROFILES[channelIndex % VIDEO_WELCOME_PROFILES.length][frame];
       if (type === "welcome") return clamp(255 * Math.sin(Math.max(0, Math.min(1, x * 1.35 - channelIndex * .045)) * Math.PI / 2));
       if (type === "breath") return clamp(20 + 235 * (.5 - .5 * Math.cos(x * Math.PI * 2)));
       if (type === "sweep") return clamp(255 * Math.exp(-Math.pow(frame - channelIndex * 1.65 - 2, 2) / 5));
@@ -28,7 +35,7 @@
   function resetDemo() {
     const names = ["DRL Left", "Low Beam", "High Beam", "Welcome Accent", "DRL Right", "Corner Left", "Corner Right", "Laser / Matrix"];
     state.channels = names.map((name, index) => ({ id: `ch-${Date.now()}-${index}`, name, color: COLORS[index], values: pattern(index < 4 ? "welcome" : "sweep", index) }));
-    state.selected = 0; state.frame = 0;
+    state.selected = 0; state.frame = 0; state.previewTheme = "";
     state.previewMap = { drl: 0, low: 1, high: 2, accent: 3 };
     renderAll();
   }
@@ -108,6 +115,7 @@
   }
 
   function renderPreview() {
+    $("#previewStage").classList.toggle("video-welcome-theme", state.previewTheme === "video-welcome");
     for (const zone of ["drl", "low", "high", "accent"]) {
       const channel = state.channels[state.previewMap[zone]] || state.channels[0];
       const level = channel ? channel.values[state.frame] / 255 : 0;

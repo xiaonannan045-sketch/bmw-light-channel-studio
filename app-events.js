@@ -6,6 +6,14 @@
 
   function applyCurrentPreset() {
     const type = $("#presetSelect").value;
+    if (type === "video-welcome") {
+      state.channels.slice(0, 4).forEach((channel, index) => { channel.values = studio.pattern(type, index); });
+      state.previewMap = { drl: 0, low: 1, high: 2, accent: 3 };
+      state.previewTheme = type; state.frame = 0; $("#speedSelect").value = "120";
+      studio.renderAll();
+      return;
+    }
+    state.previewTheme = "";
     studio.selectedChannel().values = studio.pattern(type, state.selected);
     studio.renderAll();
   }
@@ -39,7 +47,7 @@
   }
 
   function projectPayload() {
-    return { format: "bmw-light-channel-studio", version: 1, frames: studio.FRAME_COUNT, channels: state.channels, previewMap: state.previewMap, mapping: studio.mappingSnapshot(), exportedAt: new Date().toISOString() };
+    return { format: "bmw-light-channel-studio", version: 1, frames: studio.FRAME_COUNT, channels: state.channels, previewMap: state.previewMap, previewTheme: state.previewTheme, mapping: studio.mappingSnapshot(), exportedAt: new Date().toISOString() };
   }
 
   async function readJsonFile(file) {
@@ -51,7 +59,7 @@
     if (data.format !== "bmw-light-channel-studio" || !Array.isArray(data.channels)) throw new Error("不是 Light Channel Studio 工程文件");
     const channels = data.channels.map((channel, index) => ({ id: channel.id || `import-${Date.now()}-${index}`, name: String(channel.name || `Channel ${index + 1}`), color: channel.color || `hsl(${index * 47 % 360} 85% 65%)`, values: Array.from(channel.values || []).slice(0, studio.FRAME_COUNT).map(studio.clamp) }));
     if (!channels.length || channels.some(channel => channel.values.length !== studio.FRAME_COUNT)) throw new Error(`每个 Channel 必须正好包含 ${studio.FRAME_COUNT} bytes`);
-    state.channels = channels; state.selected = 0; state.previewMap = data.previewMap || state.previewMap;
+    state.channels = channels; state.selected = 0; state.previewMap = data.previewMap || state.previewMap; state.previewTheme = data.previewTheme === "video-welcome" ? data.previewTheme : "";
     if (data.mapping) setMapping(data.mapping);
     studio.renderAll();
   }
